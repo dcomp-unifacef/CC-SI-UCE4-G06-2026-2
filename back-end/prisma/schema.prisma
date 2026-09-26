@@ -1,0 +1,42 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Cliente {
+  idCliente            Int           @id @default(autoincrement())
+  nomeEmpresa          String
+  nomeResponsavel      String
+  cnpj                 String
+  telefone             String
+  email                String
+  ramo                 String?
+  participouLicitacoes Boolean       @default(false)
+  dataCadastro         DateTime      @default(now())
+  
+  // Relacionamento 1:N com Compromisso
+  compromissos         Compromisso[]
+
+  @@map("clientes")
+}
+
+model Compromisso {
+  idCompromisso      Int      @id @default(autoincrement())
+  titulo             String
+  descricao          String?
+  data               DateTime
+  horarioInicio      String
+  horarioFim         String?
+  pregao             String?
+  statusCompromisso  String   @default("Pendente")
+  antecedenciaAlerta Int      @default(1)
+  
+  // Chave Estrangeira e Relacionamento com Cliente
+  idCliente          Int
+  cliente            Cliente  @relation(fields: [idCliente], references: [idCliente], onDelete: Cascade)
+
+  @@map("compromissos")
+}
