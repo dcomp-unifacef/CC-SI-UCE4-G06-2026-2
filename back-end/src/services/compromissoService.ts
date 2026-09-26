@@ -1,7 +1,7 @@
 import * as compromissoRepository from '../repositories/compromissoRepository';
-import * as clienteService from './customerService';
+import * as clienteService from './clienteService';
 import type { CreateCompromissoDto, UpdateCompromissoDto } from '../types/compromisso';
-import { AppError } from '../types/AppError';
+import { AppError } from '../types/error';
 
 export async function create(data: CreateCompromissoDto) {
   if (!data.titulo || !data.data || !data.horarioInicio || !data.idCliente) {
@@ -23,11 +23,11 @@ export async function findAll() {
 
 export async function findById(id: number) {
   const compromisso = await compromissoRepository.findById(id);
-  
+
   if (!compromisso) {
     throw new AppError('Compromisso não encontrado', 404);
   }
-  
+
   return compromisso;
 }
 
@@ -43,6 +43,6 @@ export async function update(id: number, data: UpdateCompromissoDto) {
 
 export async function remove(id: number) {
   await findById(id);
-  
+
   return await compromissoRepository.remove(id);
 }
