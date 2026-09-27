@@ -16,8 +16,6 @@ model Cliente {
   ramo                 String?
   participouLicitacoes Boolean       @default(false)
   dataCadastro         DateTime      @default(now())
-  
-  // Relacionamento 1:N com Compromisso
   compromissos         Compromisso[]
 
   @@map("clientes")
@@ -33,8 +31,6 @@ model Compromisso {
   pregao             String?
   statusCompromisso  String   @default("Pendente")
   antecedenciaAlerta Int      @default(1)
-  
-  // Chave Estrangeira e Relacionamento com Cliente
   idCliente          Int
   cliente            Cliente  @relation(fields: [idCliente], references: [idCliente], onDelete: Cascade)
 
