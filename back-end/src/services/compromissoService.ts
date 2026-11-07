@@ -1,6 +1,6 @@
 import * as compromissoRepository from '../repositories/compromissoRepository';
 import * as clienteService from './clienteService';
-import type { CreateCompromissoDto, UpdateCompromissoDto } from '../types/compromisso';
+import type { CreateCompromissoDto, UpdateCompromissoDto } from '../dto/compromisso';
 import { AppError } from '../types/error';
 
 export async function create(data: CreateCompromissoDto) {

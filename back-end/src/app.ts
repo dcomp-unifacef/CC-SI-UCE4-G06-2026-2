@@ -6,6 +6,7 @@ import indexRouter from './routes/index'
 import usersRouter from './routes/users'
 import clientesRouter from './routes/clientes'
 import compromissosRouter from './routes/compromissos'
+import administradoresRouter from './routes/administradores'
 
 const app = express()
 
@@ -21,5 +22,6 @@ app.use('/users', usersRouter)
 
 app.use('/clientes', clientesRouter)
 app.use('/compromissos', compromissosRouter)
+app.use('/administradores', administradoresRouter)
 
 export default app

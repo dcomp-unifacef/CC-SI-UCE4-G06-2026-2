@@ -1,5 +1,5 @@
 import { prisma } from '../database/client'
-import type { CreateCompromissoDto, UpdateCompromissoDto } from '../types/compromisso'
+import type { CreateCompromissoDto, UpdateCompromissoDto } from '../dto/compromisso'
 
 export function findAll() {
   return prisma.compromisso.findMany({

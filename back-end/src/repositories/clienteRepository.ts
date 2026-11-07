@@ -1,8 +1,8 @@
 import { prisma } from '../database/client'
-import type { CreateClienteDto, UpdateClienteDto } from '../types/cliente'
+import type { CreateClienteDto, UpdateClienteDto } from '../dto/cliente'
 
 export function findAll() {
-  return prisma.cliente.findMany({ orderBy: { nomeEmpresa: 'asc' } })
+  return prisma.cliente.findMany({ orderBy: { razaoSocialNome: 'asc' } })
 }
 
 export function findById(id: number) {

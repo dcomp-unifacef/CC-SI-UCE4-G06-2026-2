@@ -6,8 +6,8 @@ import type {
 
 import * as service from "../services/clienteService";
 
-import type { CreateClienteDto } from "../types/cliente";
-import type { UpdateClienteDto } from "../types/cliente";
+import type { CreateClienteDto } from "../dto/cliente";
+import type { UpdateClienteDto } from "../dto/cliente";
 
 type ClienteIdParams = {
     id: string;

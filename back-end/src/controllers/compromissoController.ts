@@ -6,8 +6,8 @@ import type {
 
 import * as service from "../services/compromissoService";
 
-import type { CreateCompromissoDto } from "../types/compromisso";
-import type { UpdateCompromissoDto } from "../types/compromisso";
+import type { CreateCompromissoDto } from "../dto/compromisso";
+import type { UpdateCompromissoDto } from "../dto/compromisso";
 
 type CompromissoIdParams = {
     id: string;
