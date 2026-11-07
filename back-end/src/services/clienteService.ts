@@ -73,6 +73,74 @@ async function handleUniqueConstraint<T>(operation: () => Promise<T>): Promise<T
   }
 }
 
+function validateCalendarDate(value: unknown, field: string) {
+  if (typeof value !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+    throw new AppError(`Informe ${field} no formato AAAA-MM-DD.`, 400)
+  }
+
+  const [year, month, day] = value.split('-').map(Number)
+  const date = new Date(Date.UTC(year, month - 1, day))
+
+  if (
+    date.getUTCFullYear() !== year ||
+    date.getUTCMonth() !== month - 1 ||
+    date.getUTCDate() !== day
+  ) {
+    throw new AppError(`A data informada em ${field} não é válida.`, 400)
+  }
+
+  return value
+}
+
+function saoPauloMidnightToUtc(date: string) {
+  const [year, month, day] = date.split('-').map(Number)
+  const targetAsUtc = Date.UTC(year, month - 1, day)
+  let timestamp = targetAsUtc
+
+  const formatter = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'America/Sao_Paulo',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hourCycle: 'h23',
+  })
+
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    const parts = Object.fromEntries(
+      formatter
+        .formatToParts(new Date(timestamp))
+        .filter((part) => part.type !== 'literal')
+        .map((part) => [part.type, Number(part.value)]),
+    )
+    const localAsUtc = Date.UTC(
+      parts.year,
+      parts.month - 1,
+      parts.day,
+      parts.hour,
+      parts.minute,
+      parts.second,
+    )
+    const offset = localAsUtc - timestamp
+    const nextTimestamp = targetAsUtc - offset
+
+    if (nextTimestamp === timestamp) {
+      break
+    }
+
+    timestamp = nextTimestamp
+  }
+
+  return new Date(timestamp)
+}
+
+function nextCalendarDate(date: string) {
+  const [year, month, day] = date.split('-').map(Number)
+  return new Date(Date.UTC(year, month - 1, day + 1)).toISOString().slice(0, 10)
+}
+
 export async function create(data: CreateClienteDto) {
   if (!data || typeof data !== 'object') {
     throw new AppError('Os dados do cliente são inválidos.', 400)
@@ -96,6 +164,20 @@ export async function create(data: CreateClienteDto) {
 
 export async function findAll() {
   return clienteRepository.findAll()
+}
+
+export async function findReportByPeriod(dataInicio: unknown, dataFim: unknown) {
+  const startDate = validateCalendarDate(dataInicio, 'dataInicio')
+  const endDate = validateCalendarDate(dataFim, 'dataFim')
+
+  if (startDate > endDate) {
+    throw new AppError('dataInicio deve ser anterior ou igual a dataFim.', 400)
+  }
+
+  return clienteRepository.findForReportByCreatedAt(
+    saoPauloMidnightToUtc(startDate),
+    saoPauloMidnightToUtc(nextCalendarDate(endDate)),
+  )
 }
 
 export async function findById(id: number) {

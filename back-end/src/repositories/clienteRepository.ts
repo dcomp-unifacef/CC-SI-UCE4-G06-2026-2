@@ -12,6 +12,29 @@ export function findById(id: number) {
   })
 }
 
+export function findForReportByCreatedAt(start: Date, endExclusive: Date) {
+  return prisma.cliente.findMany({
+    where: {
+      criadoEm: {
+        gte: start,
+        lt: endExclusive,
+      },
+    },
+    orderBy: [{ criadoEm: 'asc' }, { idCliente: 'asc' }],
+    select: {
+      idCliente: true,
+      razaoSocialNome: true,
+      cnpjCpf: true,
+      telefoneWhatsapp: true,
+      email: true,
+      ramoAtuacao: true,
+      origemContato: true,
+      observacoes: true,
+      criadoEm: true,
+    },
+  })
+}
+
 export function create(data: CreateClienteDto) {
   return prisma.cliente.create({ data })
 }
