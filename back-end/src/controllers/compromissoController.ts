@@ -4,7 +4,12 @@ import type {
   NextFunction,
 } from 'express'
 import * as service from '../services/compromissoService'
-import type { CreateCompromissoDto, UpdateCompromissoDto } from '../dto/compromisso'
+import type {
+  CompromissoFilterDto,
+  CreateCompromissoDto,
+  UpdateCompromissoDto,
+} from '../dto/compromisso'
+import { AppError } from '../types/error'
 
 type CompromissoIdParams = {
   id: string
@@ -23,12 +28,31 @@ type UpdateCompromissoRequest = Request<
 >
 
 export async function retrieveAll(
-  _req: Request,
+  req: Request,
   res: Response,
   next: NextFunction,
 ): Promise<void> {
   try {
-    const compromissos = await service.findAll()
+    const filters: CompromissoFilterDto = {}
+
+    if (req.query.idCategoria !== undefined) {
+      const raw = req.query.idCategoria
+      const parsed = Number(raw)
+      if (
+        typeof raw !== 'string' ||
+        raw.trim() === '' ||
+        !Number.isInteger(parsed) ||
+        parsed <= 0
+      ) {
+        throw new AppError(
+          'O parâmetro idCategoria deve ser um número inteiro positivo.',
+          400,
+        )
+      }
+      filters.idCategoria = parsed
+    }
+
+    const compromissos = await service.findAll(filters)
     res.json(compromissos)
   } catch (error) {
     next(error)
@@ -85,6 +109,32 @@ export async function toggleConcluido(
     const id = Number(req.params.id)
     const compromisso = await service.toggleConcluido(id)
     res.json(compromisso)
+  } catch (error) {
+    next(error)
+  }
+}
+
+export async function getPendingAlerts(
+  _req: Request,
+  res: Response,
+  next: NextFunction,
+): Promise<void> {
+  try {
+    const alerts = await service.findEligibleAlerts()
+    res.json(alerts)
+  } catch (error) {
+    next(error)
+  }
+}
+
+export async function triggerAlerts(
+  _req: Request,
+  res: Response,
+  next: NextFunction,
+): Promise<void> {
+  try {
+    const summary = await service.dispatchPendingAlerts()
+    res.json(summary)
   } catch (error) {
     next(error)
   }

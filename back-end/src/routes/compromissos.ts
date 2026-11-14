@@ -4,6 +4,8 @@ import * as controller from '../controllers/compromissoController'
 const router = Router()
 
 router.get('/', controller.retrieveAll)
+router.get('/alertas/pendentes', controller.getPendingAlerts)
+router.post('/alertas/disparar', controller.triggerAlerts)
 router.get('/:id', controller.retrieveOne)
 router.post('/', controller.create)
 router.put('/:id', controller.update)

@@ -1,3 +1,7 @@
+export interface CompromissoFilterDto {
+  idCategoria?: number
+}
+
 export interface CreateCompromissoDto {
   titulo: string
   descricao?: string | null
