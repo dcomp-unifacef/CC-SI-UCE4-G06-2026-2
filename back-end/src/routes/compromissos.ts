@@ -1,16 +1,13 @@
-import { Router } from "express";
-import * as controller
-    from "../controllers/compromissoController";
+import { Router } from 'express'
+import * as controller from '../controllers/compromissoController'
 
+const router = Router()
 
-const router = Router();
+router.get('/', controller.retrieveAll)
+router.get('/:id', controller.retrieveOne)
+router.post('/', controller.create)
+router.put('/:id', controller.update)
+router.patch('/:id/concluido', controller.toggleConcluido)
+router.delete('/:id', controller.remove)
 
-
-router.get("/", controller.retrieveAll);
-router.get("/:id", controller.retrieveOne);
-router.post("/", controller.create);
-router.put("/:id", controller.update);
-router.delete("/:id", controller.remove);
-
-
-export default router;
+export default router

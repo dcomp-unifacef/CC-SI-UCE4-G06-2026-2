@@ -1,28 +1,77 @@
 import { prisma } from '../database/client'
-import type { CreateCompromissoDto, UpdateCompromissoDto } from '../dto/compromisso'
+import type { Prisma } from '@prisma/client'
 
 export function findAll() {
   return prisma.compromisso.findMany({
-    include: { cliente: true },
-    orderBy: { data: 'asc' },
+    include: {
+      categoria: true,
+      administrador: {
+        select: {
+          idAdministrador: true,
+          username: true,
+          criadoEm: true,
+        },
+      },
+      cliente: true,
+    },
+    orderBy: { dataHoraInicio: 'asc' },
   })
 }
 
 export function findById(id: number) {
   return prisma.compromisso.findUnique({
     where: { idCompromisso: id },
-    include: { cliente: true },
+    include: {
+      categoria: true,
+      administrador: {
+        select: {
+          idAdministrador: true,
+          username: true,
+          criadoEm: true,
+        },
+      },
+      cliente: true,
+    },
   })
 }
 
-export function create(data: CreateCompromissoDto) {
-  return prisma.compromisso.create({ data })
+export function create(data: Prisma.CompromissoUncheckedCreateInput) {
+  return prisma.compromisso.create({
+    data,
+    include: {
+      categoria: true,
+      administrador: {
+        select: {
+          idAdministrador: true,
+          username: true,
+          criadoEm: true,
+        },
+      },
+      cliente: true,
+    },
+  })
 }
 
-export function update(id: number, data: UpdateCompromissoDto) {
-  return prisma.compromisso.update({ where: { idCompromisso: id }, data })
+export function update(id: number, data: Prisma.CompromissoUncheckedUpdateInput) {
+  return prisma.compromisso.update({
+    where: { idCompromisso: id },
+    data,
+    include: {
+      categoria: true,
+      administrador: {
+        select: {
+          idAdministrador: true,
+          username: true,
+          criadoEm: true,
+        },
+      },
+      cliente: true,
+    },
+  })
 }
 
 export function remove(id: number) {
-  return prisma.compromisso.delete({ where: { idCompromisso: id } })
+  return prisma.compromisso.delete({
+    where: { idCompromisso: id },
+  })
 }

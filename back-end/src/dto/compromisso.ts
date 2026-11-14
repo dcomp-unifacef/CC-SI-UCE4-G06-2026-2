@@ -1,23 +1,25 @@
 export interface CreateCompromissoDto {
   titulo: string
   descricao?: string | null
-  data: string
-  horarioInicio: string
-  horarioFim?: string | null
-  pregao?: string | null
-  statusCompromisso?: string
-  antecedenciaAlerta?: number
-  idCliente: number
+  dataHoraInicio: string
+  dataHoraFim?: string | null
+  concluido?: boolean
+  alertaEmitido?: boolean
+  antecedenciaAlertaMinutos?: number | null
+  idCategoria?: number | null
+  idAdministrador: number
+  idCliente?: number | null
 }
 
 export interface UpdateCompromissoDto {
   titulo?: string
   descricao?: string | null
-  data?: string
-  horarioInicio?: string
-  horarioFim?: string | null
-  pregao?: string | null
-  statusCompromisso?: string
-  antecedenciaAlerta?: number
-  idCliente?: number
+  dataHoraInicio?: string
+  dataHoraFim?: string | null
+  concluido?: boolean
+  alertaEmitido?: boolean
+  antecedenciaAlertaMinutos?: number | null
+  idCategoria?: number | null
+  idAdministrador?: number
+  idCliente?: number | null
 }
