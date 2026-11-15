@@ -1,0 +1,5 @@
+{
+  "$schema": "https://oxc.rs/schemas/oxlintrc.json",
+  "plugins": ["typescript", "react"],
+  "rules": {}
+}
