@@ -4,6 +4,12 @@ import type {
   Response,
 } from 'express'
 import * as service from '../services/administradorService'
+import * as sessionStore from '../services/sessionStore'
+import {
+  SESSION_COOKIE_NAME,
+  getSessionCookieOptions,
+} from '../middlewares/authMiddleware'
+import { AppError } from '../types/error'
 import type {
   CreateAdministradorDto,
   UpdateAdministradorDto,
@@ -82,10 +88,11 @@ export async function update(
   next: NextFunction,
 ): Promise<void> {
   try {
-    const administrador = await service.update(
-      Number(req.params.id),
-      req.body,
-    )
+    const targetId = Number(req.params.id)
+    if (req.session?.idAdministrador !== targetId) {
+      throw new AppError('Acesso não autorizado para modificar outro administrador.', 403)
+    }
+    const administrador = await service.update(targetId, req.body)
     res.json(administrador)
   } catch (error) {
     next(error)
@@ -98,7 +105,11 @@ export async function remove(
   next: NextFunction,
 ): Promise<void> {
   try {
-    await service.remove(Number(req.params.id))
+    const targetId = Number(req.params.id)
+    if (req.session?.idAdministrador !== targetId) {
+      throw new AppError('Acesso não autorizado para remover outro administrador.', 403)
+    }
+    await service.remove(targetId)
     res.status(204).end()
   } catch (error) {
     next(error)
@@ -115,7 +126,46 @@ export async function authenticate(
       req.body.username,
       req.body.senha,
     )
+    const sessionId = sessionStore.createSession(administrador)
+    res.cookie(SESSION_COOKIE_NAME, sessionId, getSessionCookieOptions())
     res.json(administrador)
+  } catch (error) {
+    next(error)
+  }
+}
+
+export async function logout(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): Promise<void> {
+  try {
+    const sessionId = req.cookies?.[SESSION_COOKIE_NAME]
+    if (sessionId) {
+      sessionStore.destroySession(sessionId)
+    }
+    res.clearCookie(SESSION_COOKIE_NAME, { path: '/' })
+    res.status(204).end()
+  } catch (error) {
+    next(error)
+  }
+}
+
+export async function getCurrentSession(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): Promise<void> {
+  try {
+    if (!req.session) {
+      res.status(401).json({ erro: 'Não autenticado.' })
+      return
+    }
+    res.json({
+      idAdministrador: req.session.idAdministrador,
+      username: req.session.username,
+      criadoEm: req.session.criadoEm,
+    })
   } catch (error) {
     next(error)
   }
@@ -127,8 +177,12 @@ export async function changePassword(
   next: NextFunction,
 ): Promise<void> {
   try {
+    const targetId = Number(req.params.id)
+    if (req.session?.idAdministrador !== targetId) {
+      throw new AppError('Acesso não autorizado para alterar a senha de outro administrador.', 403)
+    }
     const administrador = await service.changePassword(
-      Number(req.params.id),
+      targetId,
       req.body.senhaAtual,
       req.body.novaSenha,
     )

@@ -1,7 +1,10 @@
 import { Router } from 'express'
 import * as controller from '../controllers/categoriaCompromissoController'
+import { requireAuth } from '../middlewares/authMiddleware'
 
 const router = Router()
+
+router.use(requireAuth)
 
 router.get('/', controller.retrieveAll)
 router.get('/:id', controller.retrieveOne)

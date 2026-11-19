@@ -35,10 +35,8 @@ export function errorHandler(
     return
   }
 
-  // Erros inesperados são logados no terminal para fins de diagnóstico
   console.error('Erro interno inesperado:', err)
 
-  // Resposta segura e genérica sem expor detalhes internos
   res.status(500).json({
     erro: 'Erro interno do servidor.',
   })

@@ -63,6 +63,9 @@ async function handleDatabaseErrors<T>(operation: () => Promise<T>): Promise<T> 
           409,
         )
       }
+      if (error.code === 'P2025') {
+        throw new AppError('Categoria não encontrada.', 404)
+      }
     }
     throw error
   }

@@ -7,7 +7,7 @@ interface HomepageProps {
 
 export default function Homepage({ onLogin }: HomepageProps) {
   return (
-    <main className="public-page">
+    <main className="public-page container-xl px-3 px-md-4">
       <header className="site-header">
         <a aria-label="Auctus, início" className="brand" href="#inicio">
           <span aria-hidden="true" className="brand-mark">A</span>
@@ -17,7 +17,7 @@ export default function Homepage({ onLogin }: HomepageProps) {
           <a href="#solucoes">Como funciona</a>
           <a href="#contato">Contato</a>
         </nav>
-        <button className="button button-outline header-login" onClick={onLogin} type="button">
+        <button className="btn button button-outline header-login" onClick={onLogin} type="button">
           Acesso da equipe
           <svg aria-hidden="true"><use href="/icons.svg#arrow-up-right" /></svg>
         </button>
@@ -29,7 +29,7 @@ export default function Homepage({ onLogin }: HomepageProps) {
           <h1>Boas ideias merecem espaço para <em>crescer.</em></h1>
           <p>Clientes, agenda e próximos passos em um só lugar. Organize sua rotina e tenha mais tempo para fazer o que importa.</p>
           <div className="hero-actions">
-            <a className="button button-dark" href="#contato">
+            <a className="btn button button-dark text-decoration-none" href="#contato">
               Conheça a Auctus
               <svg aria-hidden="true"><use href="/icons.svg#arrow-up-right" /></svg>
             </a>

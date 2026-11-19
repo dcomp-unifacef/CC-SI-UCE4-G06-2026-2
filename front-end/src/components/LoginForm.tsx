@@ -56,31 +56,33 @@ export default function LoginForm({ onSuccess, onCancel }: LoginFormProps) {
         <h2 id="login-title">Bom ter você de volta.</h2>
         <p>Entre para organizar seus clientes e compromissos.</p>
         <form className="form-stack" onSubmit={handleSubmit}>
-          <label>
+          <label className="form-label">
             Usuário
             <input
               autoComplete="username"
+              className="form-control"
               onChange={(event) => setUsername(event.target.value)}
               required
               value={username}
             />
           </label>
-          <label>
+          <label className="form-label">
             Senha
             <input
               autoComplete="current-password"
+              className="form-control"
               onChange={(event) => setSenha(event.target.value)}
               required
               type="password"
               value={senha}
             />
           </label>
-          {error && <p className="form-error" role="alert">{error}</p>}
-          <button className="button button-dark button-full" disabled={isSubmitting} type="submit">
+          {error && <p className="alert alert-danger form-error py-2 px-3 my-2" role="alert">{error}</p>}
+          <button className="btn button button-dark button-full w-100 mt-2" disabled={isSubmitting} type="submit">
             {isSubmitting ? 'Verificando…' : 'Entrar no painel'}
           </button>
         </form>
-        <button className="text-button login-cancel" onClick={onCancel} type="button">
+        <button className="btn text-button login-cancel text-decoration-none" onClick={onCancel} type="button">
           Voltar ao site
         </button>
       </section>

@@ -5,6 +5,10 @@ export function listCompromissos(): Promise<Compromisso[]> {
   return apiRequest('/compromissos')
 }
 
+export function getCompromisso(id: number): Promise<Compromisso> {
+  return apiRequest(`/compromissos/${id}`)
+}
+
 export function createCompromisso(
   input: CompromissoInput,
 ): Promise<Compromisso> {

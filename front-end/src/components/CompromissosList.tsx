@@ -6,7 +6,26 @@ import {
 } from '../data/compromissos'
 import { getErrorMessage } from '../services/api'
 import type { Compromisso } from '../types/Compromisso'
+import {
+  AlertTriangleIcon,
+  CalendarIcon,
+  EditIcon,
+  PlusIcon,
+  TrashIcon,
+} from './admin/AdminIcons'
 import TarefasChecklist from './TarefasChecklist'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogMedia,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from './ui/alert-dialog'
 
 interface CompromissosListProps {
   refreshToken: number
@@ -28,7 +47,9 @@ const timeFormatter = new Intl.DateTimeFormat('pt-BR', {
 
 function formatDate(value: string): string {
   const date = new Date(value)
-  return Number.isNaN(date.getTime()) ? 'Data inválida' : dateFormatter.format(date)
+  return Number.isNaN(date.getTime())
+    ? 'Data inválida'
+    : dateFormatter.format(date)
 }
 
 function formatTime(value: string): string {
@@ -78,12 +99,15 @@ export default function CompromissosList({
   }
 
   async function handleDelete(compromisso: Compromisso) {
-    if (!window.confirm(`Remover o compromisso "${compromisso.titulo}"?`)) return
     setBusyId(compromisso.idCompromisso)
     setError('')
     try {
       await deleteCompromisso(compromisso.idCompromisso)
-      setCompromissos((current) => current.filter((item) => item.idCompromisso !== compromisso.idCompromisso))
+      setCompromissos((current) =>
+        current.filter(
+          (item) => item.idCompromisso !== compromisso.idCompromisso,
+        ),
+      )
     } catch (deleteError) {
       setError(getErrorMessage(deleteError))
     } finally {
@@ -92,70 +116,166 @@ export default function CompromissosList({
   }
 
   return (
-    <section className="list-panel">
-      <div className="list-toolbar">
+    <section>
+      <div className="auctus-page-header">
         <div>
-          <span className="eyebrow">Sua rotina</span>
-          <h2>Agenda de compromissos</h2>
+          <span className="auctus-page-kicker">Sua rotina</span>
+          <h1 className="auctus-page-title">Agenda de compromissos</h1>
+          <p className="auctus-page-subtitle">
+            Organize atendimentos, provas e prazos em um só lugar.
+          </p>
         </div>
-        <button className="button button-dark" onClick={onCreate} type="button">+ Novo compromisso</button>
+        <button
+          className="auctus-btn-primary"
+          onClick={onCreate}
+          type="button"
+        >
+          <PlusIcon />
+          <span>Novo compromisso</span>
+        </button>
       </div>
-      {error && <p className="form-error" role="alert">{error}</p>}
-      {isLoading ? (
-        <div className="empty-state">Carregando agenda…</div>
-      ) : compromissos.length === 0 ? (
-        <div className="empty-state">
-          <span className="empty-icon">▦</span>
-          <h3>Um espaço em branco para começar.</h3>
-          <p>Adicione seu primeiro compromisso para organizar os próximos passos.</p>
-        </div>
-      ) : (
-        <div className="appointment-list">
-          {compromissos.map((compromisso) => (
-            <article
-              className={`appointment-card${compromisso.concluido ? ' appointment-done' : ''}`}
-              key={compromisso.idCompromisso}
-            >
-              <div className="appointment-date">
-                <span>{formatDate(compromisso.dataHoraInicio)}</span>
-                <b>{formatTime(compromisso.dataHoraInicio)}</b>
-                {compromisso.dataHoraFim && <small>até {formatTime(compromisso.dataHoraFim)}</small>}
-              </div>
-              <div className="appointment-mark" style={{ backgroundColor: compromisso.categoria?.corHex ?? '#b7c8b8' }} />
-              <div className="appointment-content">
-                <h3>{compromisso.titulo}</h3>
-                <p>
-                  {compromisso.cliente?.razaoSocialNome ?? 'Sem cliente vinculado'}
-                  {compromisso.categoria && <span className="appointment-category">{compromisso.categoria.nomeCategoria}</span>}
-                </p>
-                {compromisso.descricao && <small className="appointment-description">{compromisso.descricao}</small>}
-              </div>
-              <div className="appointment-actions">
-                <span className="task-control">
-                  <TarefasChecklist
-                    checked={compromisso.concluido}
-                    onToggle={() => void toggleCompleted(compromisso)}
+
+      <div className="auctus-surface">
+        {error && (
+          <p className="alert alert-danger py-2 px-3 mb-3" role="alert">
+            {error}
+          </p>
+        )}
+
+        {isLoading ? (
+          <div className="auctus-empty">Carregando agenda…</div>
+        ) : compromissos.length === 0 ? (
+          <div className="auctus-empty">
+            <span className="auctus-empty-icon">
+              <CalendarIcon />
+            </span>
+            <h3>Um espaço em branco para começar.</h3>
+            <p>
+              Adicione seu primeiro compromisso para organizar os próximos
+              passos.
+            </p>
+          </div>
+        ) : (
+          <div className="auctus-agenda-list">
+            {compromissos.map((compromisso) => {
+              const isBusy = busyId === compromisso.idCompromisso
+
+              return (
+                <article
+                  className={`auctus-agenda-card${compromisso.concluido ? ' is-done' : ''}`}
+                  key={compromisso.idCompromisso}
+                >
+                  <div className="auctus-agenda-date">
+                    <span className="auctus-agenda-day">
+                      {formatDate(compromisso.dataHoraInicio)}
+                    </span>
+                    <strong className="auctus-agenda-time">
+                      {formatTime(compromisso.dataHoraInicio)}
+                    </strong>
+                    {compromisso.dataHoraFim && (
+                      <span className="auctus-agenda-end">
+                        até {formatTime(compromisso.dataHoraFim)}
+                      </span>
+                    )}
+                  </div>
+
+                  <div
+                    aria-hidden="true"
+                    className="auctus-agenda-accent"
+                    style={{
+                      backgroundColor:
+                        compromisso.categoria?.corHex ?? '#b7c8b8',
+                    }}
                   />
-                  <small>{compromisso.concluido ? 'Concluído' : 'Pendente'}</small>
-                </span>
-                <button
-                  aria-label={`Editar ${compromisso.titulo}`}
-                  className="icon-button"
-                  onClick={() => onEdit(compromisso)}
-                  type="button"
-                >✎</button>
-                <button
-                  aria-label={`Remover ${compromisso.titulo}`}
-                  className="icon-button danger-text"
-                  disabled={busyId === compromisso.idCompromisso}
-                  onClick={() => void handleDelete(compromisso)}
-                  type="button"
-                >×</button>
-              </div>
-            </article>
-          ))}
-        </div>
-      )}
+
+                  <div className="auctus-agenda-body">
+                    <h2 className="auctus-agenda-title">
+                      {compromisso.titulo}
+                    </h2>
+                    <div className="auctus-agenda-meta">
+                      <span>
+                        {compromisso.cliente?.razaoSocialNome ??
+                          'Sem cliente vinculado'}
+                      </span>
+                      {compromisso.categoria && (
+                        <span className="auctus-pill">
+                          {compromisso.categoria.nomeCategoria}
+                        </span>
+                      )}
+                    </div>
+                    {compromisso.descricao && (
+                      <p className="auctus-agenda-desc">
+                        {compromisso.descricao}
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="auctus-agenda-actions">
+                    <span className="task-control">
+                      <TarefasChecklist
+                        checked={compromisso.concluido}
+                        onToggle={() => void toggleCompleted(compromisso)}
+                      />
+                      <small>
+                        {compromisso.concluido ? 'Concluído' : 'Pendente'}
+                      </small>
+                    </span>
+
+                    <button
+                      aria-label={`Editar ${compromisso.titulo}`}
+                      className="auctus-btn-icon"
+                      onClick={() => onEdit(compromisso)}
+                      title="Editar"
+                      type="button"
+                    >
+                      <EditIcon />
+                    </button>
+                    <AlertDialog>
+                      <AlertDialogTrigger
+                        render={
+                          <button
+                            aria-label={`Remover ${compromisso.titulo}`}
+                            className="auctus-btn-icon is-danger"
+                            disabled={isBusy}
+                            title="Remover"
+                            type="button"
+                          />
+                        }
+                      >
+                        <TrashIcon />
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogMedia>
+                            <AlertTriangleIcon />
+                          </AlertDialogMedia>
+                          <AlertDialogTitle>
+                            Excluir compromisso?
+                          </AlertDialogTitle>
+                          <AlertDialogDescription>
+                            Esta ação não pode ser desfeita. O compromisso{' '}
+                            <strong>"{compromisso.titulo}"</strong> será
+                            removido permanentemente da sua agenda.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                          <AlertDialogAction
+                            onClick={() => void handleDelete(compromisso)}
+                            variant="destructive"
+                          >
+                            Confirmar exclusão
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                  </div>
+                </article>
+              )
+            })}
+          </div>
+        )}
+      </div>
     </section>
   )
 }
