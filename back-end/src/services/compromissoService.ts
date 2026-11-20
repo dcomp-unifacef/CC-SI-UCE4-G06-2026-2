@@ -48,7 +48,10 @@ function nullableText(value: unknown, field: string): string | null | undefined 
   return normalized || null
 }
 
-export async function create(data: CreateCompromissoDto) {
+export async function create(
+  data: CreateCompromissoDto,
+  sessionAdminId?: number,
+) {
   if (!data || typeof data !== 'object') {
     throw new AppError('Os dados do compromisso são inválidos.', 400)
   }
@@ -67,6 +70,29 @@ export async function create(data: CreateCompromissoDto) {
     if (dataHoraFim < dataHoraInicio) {
       throw new AppError('A dataHoraFim não pode ser anterior à dataHoraInicio.', 400)
     }
+  }
+
+  if (data.concluido !== undefined && typeof data.concluido !== 'boolean') {
+    throw new AppError('O campo concluido deve ser um booleano.', 400)
+  }
+
+  if (data.alertaEmitido !== undefined && typeof data.alertaEmitido !== 'boolean') {
+    throw new AppError('O campo alertaEmitido deve ser um booleano.', 400)
+  }
+
+  if (
+    data.antecedenciaAlertaMinutos !== undefined &&
+    data.antecedenciaAlertaMinutos !== null &&
+    (!Number.isInteger(data.antecedenciaAlertaMinutos) || data.antecedenciaAlertaMinutos < 0)
+  ) {
+    throw new AppError(
+      'O campo antecedenciaAlertaMinutos deve ser um número inteiro maior ou igual a zero ou nulo.',
+      400,
+    )
+  }
+
+  if (sessionAdminId !== undefined) {
+    data.idAdministrador = sessionAdminId
   }
 
   if (data.idAdministrador === undefined || data.idAdministrador === null) {
@@ -106,19 +132,26 @@ export async function create(data: CreateCompromissoDto) {
   return compromissoRepository.create(record)
 }
 
-export async function findAll(filters?: CompromissoFilterDto) {
-  let where: Prisma.CompromissoWhereInput | undefined
+export async function findAll(
+  filters?: CompromissoFilterDto,
+  sessionAdminId?: number,
+) {
+  let where: Prisma.CompromissoWhereInput = {}
 
   if (filters && filters.idCategoria !== undefined) {
     validateId(filters.idCategoria, 'idCategoria')
     await categoriaCompromissoService.findById(filters.idCategoria)
-    where = { idCategoria: filters.idCategoria }
+    where.idCategoria = filters.idCategoria
   }
 
-  return compromissoRepository.findAll(where)
+  if (sessionAdminId !== undefined) {
+    where.idAdministrador = sessionAdminId
+  }
+
+  return compromissoRepository.findAll(Object.keys(where).length > 0 ? where : undefined)
 }
 
-export async function findById(id: number) {
+export async function findById(id: number, sessionAdminId?: number) {
   validateId(id, 'idCompromisso')
 
   const compromisso = await compromissoRepository.findById(id)
@@ -126,17 +159,25 @@ export async function findById(id: number) {
     throw new AppError('Compromisso não encontrado.', 404)
   }
 
+  if (sessionAdminId !== undefined && compromisso.idAdministrador !== sessionAdminId) {
+    throw new AppError('Compromisso não encontrado.', 404)
+  }
+
   return compromisso
 }
 
-export async function update(id: number, data: UpdateCompromissoDto) {
+export async function update(
+  id: number,
+  data: UpdateCompromissoDto,
+  sessionAdminId?: number,
+) {
   validateId(id, 'idCompromisso')
 
   if (!data || typeof data !== 'object') {
     throw new AppError('Os dados do compromisso são inválidos.', 400)
   }
 
-  const existing = await findById(id)
+  const existing = await findById(id, sessionAdminId)
   const updateData: Prisma.CompromissoUncheckedUpdateInput = {}
 
   if (data.titulo !== undefined) {
@@ -147,28 +188,32 @@ export async function update(id: number, data: UpdateCompromissoDto) {
     updateData.descricao = nullableText(data.descricao, 'descricao')
   }
 
-  let newInicio = existing.dataHoraInicio
-  if (data.dataHoraInicio !== undefined) {
-    newInicio = parseValidDate(data.dataHoraInicio, 'dataHoraInicio')
-    updateData.dataHoraInicio = newInicio
+  const effectiveInicio =
+    data.dataHoraInicio !== undefined
+      ? parseValidDate(data.dataHoraInicio, 'dataHoraInicio')
+      : existing.dataHoraInicio
 
-    // Conforme Diagrama REV00: Se a data for alterada e o evento não estiver concluído,
-    // redefine alertaEmitido = false para permitir novo alerta.
+  const effectiveFim =
+    data.dataHoraFim !== undefined
+      ? data.dataHoraFim === null
+        ? null
+        : parseValidDate(data.dataHoraFim, 'dataHoraFim')
+      : existing.dataHoraFim
+
+  if (effectiveFim !== null && effectiveFim < effectiveInicio) {
+    throw new AppError('A dataHoraFim não pode ser anterior à dataHoraInicio.', 400)
+  }
+
+  if (data.dataHoraInicio !== undefined) {
+    updateData.dataHoraInicio = effectiveInicio
+
     if (!existing.concluido && data.alertaEmitido === undefined) {
       updateData.alertaEmitido = false
     }
   }
 
   if (data.dataHoraFim !== undefined) {
-    if (data.dataHoraFim === null) {
-      updateData.dataHoraFim = null
-    } else {
-      const newFim = parseValidDate(data.dataHoraFim, 'dataHoraFim')
-      if (newFim < newInicio) {
-        throw new AppError('A dataHoraFim não pode ser anterior à dataHoraInicio.', 400)
-      }
-      updateData.dataHoraFim = newFim
-    }
+    updateData.dataHoraFim = effectiveFim
   }
 
   if (data.concluido !== undefined) {
@@ -197,12 +242,8 @@ export async function update(id: number, data: UpdateCompromissoDto) {
       if (data.alertaEmitido === undefined) {
         updateData.alertaEmitido = true
       }
-    } else {
-      // Se alterou a antecedência e o compromisso não estiver concluído,
-      // recalcula/permite nova emissão se ainda não foi explicitamente cancelado
-      if (!existing.concluido && data.alertaEmitido === undefined) {
-        updateData.alertaEmitido = false
-      }
+    } else if (!existing.concluido && data.alertaEmitido === undefined) {
+      updateData.alertaEmitido = false
     }
   }
 
@@ -239,10 +280,17 @@ export async function update(id: number, data: UpdateCompromissoDto) {
   return compromissoRepository.update(id, updateData)
 }
 
-export async function toggleConcluido(id: number) {
-  const compromisso = await findById(id)
+export async function toggleConcluido(
+  id: number,
+  targetStatus?: boolean,
+  sessionAdminId?: number,
+) {
+  validateId(id, 'idCompromisso')
+  const compromisso = await findById(id, sessionAdminId)
+  const nextConcluido = targetStatus !== undefined ? targetStatus : !compromisso.concluido
+
   return compromissoRepository.update(id, {
-    concluido: !compromisso.concluido,
+    concluido: nextConcluido,
   })
 }
 
@@ -285,9 +333,16 @@ export function isAlertDue(
   return now.getTime() >= alertTime.getTime()
 }
 
-export async function findEligibleAlerts(referenceDate: Date = new Date()) {
+export async function findEligibleAlerts(
+  referenceDate: Date = new Date(),
+  sessionAdminId?: number,
+) {
   const candidates = await compromissoRepository.findPendingAlerts(referenceDate)
-  return candidates.filter((item) => isAlertDue(item, referenceDate))
+  return candidates.filter(
+    (item) =>
+      (sessionAdminId === undefined || item.idAdministrador === sessionAdminId) &&
+      isAlertDue(item, referenceDate),
+  )
 }
 
 export async function markAlertAsEmitted(id: number) {
@@ -311,8 +366,9 @@ export interface DispatchSummary {
 export async function dispatchPendingAlerts(
   referenceDate: Date = new Date(),
   sender?: (compromisso: Awaited<ReturnType<typeof findEligibleAlerts>>[number]) => Promise<void>,
+  sessionAdminId?: number,
 ): Promise<DispatchSummary> {
-  const eligible = await findEligibleAlerts(referenceDate)
+  const eligible = await findEligibleAlerts(referenceDate, sessionAdminId)
 
   const summary: DispatchSummary = {
     processed: eligible.length,
@@ -322,10 +378,8 @@ export async function dispatchPendingAlerts(
   }
 
   for (const comp of eligible) {
-    // Bloqueio atômico contra concorrência: reivindica emissão antes do envio
     const claimed = await claimAlertEmission(comp.idCompromisso)
     if (!claimed) {
-      // Outra requisição/thread concorrente já reivindicou a emissão deste alerta
       continue
     }
 
@@ -333,21 +387,18 @@ export async function dispatchPendingAlerts(
       if (sender) {
         await sender(comp)
       } else {
-        // Disparo via canal de notificação padrão: Registro estruturado em console
-        // (Prevenção de interrupção e preparação para integração com canal definitivo)
         console.log(
           `[ALERTA DISPARADO] Compromisso ID ${comp.idCompromisso}: "${comp.titulo}" agendado para ${comp.dataHoraInicio.toISOString()} (Categoria: ${comp.categoria?.nomeCategoria || 'Geral'})`,
         )
       }
 
       summary.emitted++
-    } catch (error: any) {
-      // Em caso de falha no canal de envio, desfaz a marcação para permitir retry posterior
+    } catch (error: unknown) {
       await compromissoRepository.update(comp.idCompromisso, { alertaEmitido: false })
       summary.failed++
       summary.errors.push({
         idCompromisso: comp.idCompromisso,
-        error: error?.message || 'Falha desconhecida no disparo',
+        error: error instanceof Error ? error.message : 'Falha desconhecida no disparo',
       })
     }
   }
@@ -355,7 +406,7 @@ export async function dispatchPendingAlerts(
   return summary
 }
 
-export async function remove(id: number) {
-  await findById(id)
+export async function remove(id: number, sessionAdminId?: number) {
+  await findById(id, sessionAdminId)
   return compromissoRepository.remove(id)
 }

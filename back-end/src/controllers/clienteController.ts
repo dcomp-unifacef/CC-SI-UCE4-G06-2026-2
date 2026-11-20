@@ -163,6 +163,28 @@ export async function create(
     }
 }
 
+export async function createPublicLead(
+    req: Request,
+    res: Response,
+    next: NextFunction
+): Promise<void> {
+    try {
+        const { razaoSocialNome, telefoneWhatsapp, email } = req.body || {}
+        const lead = await service.create({
+            razaoSocialNome,
+            telefoneWhatsapp,
+            email: email || null,
+            cnpjCpf: null,
+            ramoAtuacao: null,
+            origemContato: 'Site',
+            observacoes: null,
+        })
+        res.status(201).json(lead)
+    } catch (error) {
+        next(error)
+    }
+}
+
 
 export async function update(
     req: UpdateClienteRequest,

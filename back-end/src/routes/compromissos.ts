@@ -1,7 +1,10 @@
 import { Router } from 'express'
 import * as controller from '../controllers/compromissoController'
+import { requireAuth } from '../middlewares/authMiddleware'
 
 const router = Router()
+
+router.use(requireAuth)
 
 router.get('/', controller.retrieveAll)
 router.get('/alertas/pendentes', controller.getPendingAlerts)

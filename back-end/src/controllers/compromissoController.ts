@@ -52,7 +52,7 @@ export async function retrieveAll(
       filters.idCategoria = parsed
     }
 
-    const compromissos = await service.findAll(filters)
+    const compromissos = await service.findAll(filters, req.session?.idAdministrador)
     res.json(compromissos)
   } catch (error) {
     next(error)
@@ -66,7 +66,7 @@ export async function retrieveOne(
 ): Promise<void> {
   try {
     const id = Number(req.params.id)
-    const compromisso = await service.findById(id)
+    const compromisso = await service.findById(id, req.session?.idAdministrador)
     res.json(compromisso)
   } catch (error) {
     next(error)
@@ -79,7 +79,7 @@ export async function create(
   next: NextFunction,
 ): Promise<void> {
   try {
-    const compromisso = await service.create(req.body)
+    const compromisso = await service.create(req.body, req.session?.idAdministrador)
     res.status(201).json(compromisso)
   } catch (error) {
     next(error)
@@ -93,7 +93,7 @@ export async function update(
 ): Promise<void> {
   try {
     const id = Number(req.params.id)
-    const compromisso = await service.update(id, req.body)
+    const compromisso = await service.update(id, req.body, req.session?.idAdministrador)
     res.json(compromisso)
   } catch (error) {
     next(error)
@@ -101,13 +101,26 @@ export async function update(
 }
 
 export async function toggleConcluido(
-  req: Request<CompromissoIdParams>,
+  req: Request<CompromissoIdParams, unknown, { concluido?: boolean }>,
   res: Response,
   next: NextFunction,
 ): Promise<void> {
   try {
     const id = Number(req.params.id)
-    const compromisso = await service.toggleConcluido(id)
+    let targetStatus: boolean | undefined
+
+    if (req.body && req.body.concluido !== undefined) {
+      if (typeof req.body.concluido !== 'boolean') {
+        throw new AppError('O campo concluido deve ser um booleano.', 400)
+      }
+      targetStatus = req.body.concluido
+    }
+
+    const compromisso = await service.toggleConcluido(
+      id,
+      targetStatus,
+      req.session?.idAdministrador,
+    )
     res.json(compromisso)
   } catch (error) {
     next(error)
@@ -115,12 +128,12 @@ export async function toggleConcluido(
 }
 
 export async function getPendingAlerts(
-  _req: Request,
+  req: Request,
   res: Response,
   next: NextFunction,
 ): Promise<void> {
   try {
-    const alerts = await service.findEligibleAlerts()
+    const alerts = await service.findEligibleAlerts(new Date(), req.session?.idAdministrador)
     res.json(alerts)
   } catch (error) {
     next(error)
@@ -128,12 +141,16 @@ export async function getPendingAlerts(
 }
 
 export async function triggerAlerts(
-  _req: Request,
+  req: Request,
   res: Response,
   next: NextFunction,
 ): Promise<void> {
   try {
-    const summary = await service.dispatchPendingAlerts()
+    const summary = await service.dispatchPendingAlerts(
+      new Date(),
+      undefined,
+      req.session?.idAdministrador,
+    )
     res.json(summary)
   } catch (error) {
     next(error)
@@ -147,7 +164,7 @@ export async function remove(
 ): Promise<void> {
   try {
     const id = Number(req.params.id)
-    await service.remove(id)
+    await service.remove(id, req.session?.idAdministrador)
     res.status(204).end()
   } catch (error) {
     next(error)

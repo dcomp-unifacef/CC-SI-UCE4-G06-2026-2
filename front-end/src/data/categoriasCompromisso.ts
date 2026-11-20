@@ -8,6 +8,10 @@ export function listCategorias(): Promise<CategoriaCompromisso[]> {
   return apiRequest('/categorias-compromisso')
 }
 
+export function getCategoria(id: number): Promise<CategoriaCompromisso> {
+  return apiRequest(`/categorias-compromisso/${id}`)
+}
+
 export function createCategoria(
   input: CategoriaCompromissoInput,
 ): Promise<CategoriaCompromisso> {

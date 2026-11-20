@@ -11,12 +11,14 @@ export async function apiRequest<T>(
 ): Promise<T> {
   const headers = new Headers(options.headers)
   headers.set('Accept', 'application/json')
+  headers.set('X-Requested-With', 'XMLHttpRequest')
 
   if (options.body && !(options.body instanceof FormData)) {
     headers.set('Content-Type', 'application/json')
   }
 
   const response = await fetch(`${API_BASE_URL}${path}`, {
+    credentials: 'include',
     ...options,
     headers,
   })
@@ -34,6 +36,10 @@ export async function apiRequest<T>(
     } catch {
       responseBody = responseText
     }
+  }
+
+  if (response.status === 401 && path !== '/administradores/autenticar' && path !== '/administradores/sessao') {
+    window.dispatchEvent(new CustomEvent('atelie:unauthorized'))
   }
 
   if (!response.ok) {
