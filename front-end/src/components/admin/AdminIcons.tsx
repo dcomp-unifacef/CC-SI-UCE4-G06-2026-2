@@ -88,6 +88,24 @@ export function PlusIcon({ className }: { className?: string }) {
   )
 }
 
+export function DownloadIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      aria-hidden="true"
+      className={className}
+      fill="none"
+      stroke="currentColor"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth="1.75"
+      viewBox="0 0 24 24"
+    >
+      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+      <path d="m7 10 5 5 5-5M12 15V3" />
+    </svg>
+  )
+}
+
 export function EditIcon({ className }: { className?: string }) {
   return (
     <svg

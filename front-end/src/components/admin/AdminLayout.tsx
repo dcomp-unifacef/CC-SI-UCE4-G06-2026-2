@@ -42,10 +42,7 @@ export default function AdminLayout({
           className="auctus-sidebar-brand"
           to="/painel/compromissos"
         >
-          <span aria-hidden="true" className="brand-mark">
-            A
-          </span>
-          <span className="auctus-sidebar-brand-title">AUCTUS</span>
+          <img alt="" className="auctus-logo" src="/logo-auctus.png" />
         </Link>
 
         <div className="auctus-sidebar-group-label">Espaço de trabalho</div>
@@ -84,9 +81,7 @@ export default function AdminLayout({
               className="auctus-mobile-brand"
               to="/painel/compromissos"
             >
-              <span aria-hidden="true" className="brand-mark">
-                A
-              </span>
+              <img alt="" className="auctus-logo" src="/logo-auctus.png" />
             </Link>
           </div>
 

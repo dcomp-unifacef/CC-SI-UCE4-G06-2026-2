@@ -2,7 +2,12 @@ import { useEffect, useState } from 'react'
 import { deleteCliente, listClientes } from '../data/clientes'
 import { getErrorMessage } from '../services/api'
 import type { Cliente } from '../types/Cliente'
-import { AlertTriangleIcon, PlusIcon, UsersIcon } from './admin/AdminIcons'
+import {
+  AlertTriangleIcon,
+  DownloadIcon,
+  PlusIcon,
+  UsersIcon,
+} from './admin/AdminIcons'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -20,6 +25,12 @@ interface ClientesListProps {
   refreshToken: number
   onCreate: () => void
   onEdit: (cliente: Cliente) => void
+}
+
+function csvCell(value: string | number): string {
+  const text = String(value)
+  const safeText = /^[=+\-@\t\r]/.test(text) ? `'${text}` : text
+  return `"${safeText.replaceAll('"', '""')}"`
 }
 
 export default function ClientesList({
@@ -61,6 +72,51 @@ export default function ClientesList({
       setError(getErrorMessage(deleteError))
     } finally {
       setDeletingId(null)
+    }
+  }
+
+  function handleExport() {
+    setError('')
+    try {
+      const columns = [
+        'ID',
+        'Nome / razão social',
+        'CPF / CNPJ',
+        'Telefone / WhatsApp',
+        'E-mail',
+        'Ramo de atuação',
+        'Origem do contato',
+        'Observações',
+        'Data de cadastro',
+      ]
+      const rows: (string | number)[][] = [
+        columns,
+        ...clientes.map((cliente) => [
+          cliente.idCliente,
+          cliente.razaoSocialNome,
+          cliente.cnpjCpf ?? '',
+          cliente.telefoneWhatsapp,
+          cliente.email ?? '',
+          cliente.ramoAtuacao ?? '',
+          cliente.origemContato,
+          cliente.observacoes ?? '',
+          new Date(cliente.criadoEm).toLocaleDateString('pt-BR'),
+        ]),
+      ]
+      const csv = `\uFEFF${rows
+        .map((row) => row.map(csvCell).join(';'))
+        .join('\r\n')}`
+      const file = new Blob([csv], { type: 'text/csv;charset=utf-8' })
+      const url = URL.createObjectURL(file)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = 'clientes.csv'
+      document.body.append(link)
+      link.click()
+      link.remove()
+      window.setTimeout(() => URL.revokeObjectURL(url), 0)
+    } catch (exportError: unknown) {
+      setError(getErrorMessage(exportError))
     }
   }
 
@@ -279,6 +335,17 @@ export default function ClientesList({
                   </div>
                 </article>
               ))}
+            </div>
+            <div className="auctus-client-export">
+              <button
+                className="auctus-btn-secondary"
+                onClick={handleExport}
+                title="Baixar lista compatível com Excel (.csv)"
+                type="button"
+              >
+                <DownloadIcon />
+                <span>Exportar para Excel</span>
+              </button>
             </div>
           </>
         )}

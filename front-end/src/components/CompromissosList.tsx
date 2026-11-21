@@ -8,6 +8,7 @@ import { getErrorMessage } from '../services/api'
 import type { Compromisso } from '../types/Compromisso'
 import {
   AlertTriangleIcon,
+  ArrowLeftIcon,
   CalendarIcon,
   EditIcon,
   PlusIcon,
@@ -45,6 +46,20 @@ const timeFormatter = new Intl.DateTimeFormat('pt-BR', {
   minute: '2-digit',
 })
 
+const weekdayFormatter = new Intl.DateTimeFormat('pt-BR', {
+  weekday: 'short',
+})
+
+const dayNumberFormatter = new Intl.DateTimeFormat('pt-BR', {
+  day: '2-digit',
+})
+
+const weekRangeFormatter = new Intl.DateTimeFormat('pt-BR', {
+  day: '2-digit',
+  month: '2-digit',
+  year: 'numeric',
+})
+
 function formatDate(value: string): string {
   const date = new Date(value)
   return Number.isNaN(date.getTime())
@@ -57,6 +72,16 @@ function formatTime(value: string): string {
   return Number.isNaN(date.getTime()) ? '--:--' : timeFormatter.format(date)
 }
 
+function startOfWeek(date: Date): Date {
+  const start = new Date(date.getFullYear(), date.getMonth(), date.getDate())
+  start.setDate(start.getDate() - start.getDay())
+  return start
+}
+
+function dateKey(date: Date): string {
+  return `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`
+}
+
 export default function CompromissosList({
   refreshToken,
   onCreate,
@@ -67,6 +92,28 @@ export default function CompromissosList({
   const [error, setError] = useState('')
   const [isLoading, setIsLoading] = useState(true)
   const [busyId, setBusyId] = useState<number | null>(null)
+  const [viewMode, setViewMode] = useState<'list' | 'week'>('list')
+  const [showOnlyPending, setShowOnlyPending] = useState(false)
+  const [weekStart, setWeekStart] = useState(() => startOfWeek(new Date()))
+  const [todayKey] = useState(() => dateKey(new Date()))
+  const visibleCompromissos = showOnlyPending
+    ? compromissos.filter((compromisso) => !compromisso.concluido)
+    : compromissos
+
+  const weekDays = Array.from({ length: 7 }, (_, index) => {
+    const date = new Date(weekStart)
+    date.setDate(weekStart.getDate() + index)
+    return date
+  })
+  const commitmentsByDay = new Map(
+    weekDays.map((date) => [dateKey(date), [] as Compromisso[]]),
+  )
+
+  for (const compromisso of visibleCompromissos) {
+    const start = new Date(compromisso.dataHoraInicio)
+    if (Number.isNaN(start.getTime())) continue
+    commitmentsByDay.get(dateKey(start))?.push(compromisso)
+  }
 
   useEffect(() => {
     let active = true
@@ -142,6 +189,84 @@ export default function CompromissosList({
           </p>
         )}
 
+        <div className="auctus-agenda-toolbar">
+          <div
+            aria-label="Forma de exibição"
+            className="auctus-view-switch"
+            role="group"
+          >
+            <button
+              aria-pressed={viewMode === 'list'}
+              className={viewMode === 'list' ? 'is-selected' : ''}
+              onClick={() => setViewMode('list')}
+              type="button"
+            >
+              Lista
+            </button>
+            <button
+              aria-pressed={viewMode === 'week'}
+              className={viewMode === 'week' ? 'is-selected' : ''}
+              onClick={() => setViewMode('week')}
+              type="button"
+            >
+              Agenda semanal
+            </button>
+          </div>
+
+          {viewMode === 'week' && (
+            <div aria-label="Navegar pela semana" className="auctus-week-nav">
+              <button
+                aria-label="Semana anterior"
+                className="auctus-btn-icon"
+                onClick={() =>
+                  setWeekStart((current) => {
+                    const previous = new Date(current)
+                    previous.setDate(previous.getDate() - 7)
+                    return previous
+                  })
+                }
+                type="button"
+              >
+                <ArrowLeftIcon />
+              </button>
+              <strong>
+                {weekRangeFormatter.format(weekDays[0])} -{' '}
+                {weekRangeFormatter.format(weekDays[6])}
+              </strong>
+              <button
+                aria-label="Próxima semana"
+                className="auctus-btn-icon"
+                onClick={() =>
+                  setWeekStart((current) => {
+                    const next = new Date(current)
+                    next.setDate(next.getDate() + 7)
+                    return next
+                  })
+                }
+                type="button"
+              >
+                <ArrowLeftIcon className="is-flipped" />
+              </button>
+              <button
+                className="auctus-btn-secondary auctus-week-today"
+                onClick={() => setWeekStart(startOfWeek(new Date()))}
+                type="button"
+              >
+                Hoje
+              </button>
+            </div>
+          )}
+        </div>
+
+        <label className="auctus-pending-filter">
+          <input
+            checked={showOnlyPending}
+            onChange={(event) => setShowOnlyPending(event.target.checked)}
+            type="checkbox"
+          />
+          <span>Mostrar somente pendentes</span>
+        </label>
+
         {isLoading ? (
           <div className="auctus-empty">Carregando agenda…</div>
         ) : compromissos.length === 0 ? (
@@ -155,9 +280,97 @@ export default function CompromissosList({
               passos.
             </p>
           </div>
+        ) : visibleCompromissos.length === 0 ? (
+          <div className="auctus-empty">
+            <h3>Nenhum compromisso pendente.</h3>
+            <p>Desmarque o filtro para ver todos os compromissos.</p>
+          </div>
+        ) : viewMode === 'week' ? (
+          <div
+            aria-label="Compromissos da semana"
+            className="auctus-week-calendar"
+          >
+            <div className="auctus-week-grid">
+              {weekDays.map((date) => {
+                const dayCommitments = commitmentsByDay.get(dateKey(date)) ?? []
+                dayCommitments.sort(
+                  (first, second) =>
+                    new Date(first.dataHoraInicio).getTime() -
+                    new Date(second.dataHoraInicio).getTime(),
+                )
+                const isToday = dateKey(date) === todayKey
+
+                return (
+                  <section
+                    aria-label={date.toLocaleDateString('pt-BR')}
+                    className={`auctus-week-day${isToday ? ' is-today' : ''}`}
+                    key={dateKey(date)}
+                  >
+                    <header className="auctus-week-day-header">
+                      <span>{weekdayFormatter.format(date).replace('.', '')}</span>
+                      <strong>{dayNumberFormatter.format(date)}</strong>
+                    </header>
+                    <div className="auctus-week-events">
+                      {dayCommitments.length === 0 ? (
+                        <span className="auctus-week-no-events">
+                          Sem compromissos
+                        </span>
+                      ) : (
+                        dayCommitments.map((compromisso) => (
+                          <article
+                            className={`auctus-week-event${compromisso.concluido ? ' is-done' : ''}`}
+                            key={compromisso.idCompromisso}
+                          >
+                            <span
+                              aria-hidden="true"
+                              className="auctus-week-event-accent"
+                              style={{
+                                backgroundColor:
+                                  compromisso.categoria?.corHex ?? '#b7c8b8',
+                              }}
+                            />
+                            <div className="auctus-week-event-content">
+                              <strong className="auctus-week-event-time">
+                                {formatTime(compromisso.dataHoraInicio)}
+                                {compromisso.dataHoraFim &&
+                                  ` – ${formatTime(compromisso.dataHoraFim)}`}
+                              </strong>
+                              <h3>{compromisso.titulo}</h3>
+                              {compromisso.categoria && (
+                                <span className="auctus-week-event-category">
+                                  {compromisso.categoria.nomeCategoria}
+                                </span>
+                              )}
+                              <div className="auctus-week-event-actions">
+                                <TarefasChecklist
+                                  checked={compromisso.concluido}
+                                  onToggle={() =>
+                                    void toggleCompleted(compromisso)
+                                  }
+                                />
+                                <button
+                                  aria-label={`Editar ${compromisso.titulo}`}
+                                  className="auctus-btn-icon"
+                                  onClick={() => onEdit(compromisso)}
+                                  title="Editar"
+                                  type="button"
+                                >
+                                  <EditIcon />
+                                </button>
+                              </div>
+                            </div>
+                          </article>
+                        ))
+                      )}
+                    </div>
+                  </section>
+                )
+              })}
+            </div>
+          </div>
         ) : (
           <div className="auctus-agenda-list">
-            {compromissos.map((compromisso) => {
+            {visibleCompromissos.map((compromisso) => {
               const isBusy = busyId === compromisso.idCompromisso
 
               return (

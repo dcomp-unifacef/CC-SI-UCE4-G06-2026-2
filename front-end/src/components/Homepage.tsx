@@ -10,8 +10,7 @@ export default function Homepage({ onLogin }: HomepageProps) {
     <main className="public-page container-xl px-3 px-md-4">
       <header className="site-header">
         <a aria-label="Auctus, início" className="brand" href="#inicio">
-          <span aria-hidden="true" className="brand-mark">A</span>
-          <span>AUCTUS LICITAÇÕES</span>
+          <img alt="" className="brand-logo" src="/logo-auctus.png" />
         </a>
         <nav aria-label="Navegação principal" className="site-nav">
           <a href="#empresa">A empresa</a>
@@ -88,7 +87,10 @@ export default function Homepage({ onLogin }: HomepageProps) {
       <PortfolioCasosSucesso />
       <ContatoLeadForm />
       <footer className="site-footer">
-        <a aria-label="Auctus, início" className="brand" href="#inicio"><span aria-hidden="true" className="brand-mark">A</span><span>AUCTUS LICITAÇÕES</span></a>
+        <a aria-label="Auctus, início" className="brand" href="#inicio">
+          <span aria-hidden="true" className="brand-mark">A</span>
+          <span>AUCTUS LICITAÇÕES</span>
+        </a>
         <span>Auctus Licitações · novas oportunidades para sua empresa</span>
         <a href="#inicio">Voltar ao início ↑</a>
       </footer>
