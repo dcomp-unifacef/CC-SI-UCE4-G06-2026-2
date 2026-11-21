@@ -136,7 +136,16 @@ export default function CompromissosList({
     setBusyId(compromisso.idCompromisso)
     setError('')
     try {
-      await toggleCompromissoConcluido(compromisso.idCompromisso)
+      const updatedCompromisso = await toggleCompromissoConcluido(
+        compromisso.idCompromisso,
+      )
+      setCompromissos((current) =>
+        current.map((item) =>
+          item.idCompromisso === updatedCompromisso.idCompromisso
+            ? updatedCompromisso
+            : item,
+        ),
+      )
       onChanged()
     } catch (toggleError) {
       setError(getErrorMessage(toggleError))
@@ -155,6 +164,7 @@ export default function CompromissosList({
           (item) => item.idCompromisso !== compromisso.idCompromisso,
         ),
       )
+      onChanged()
     } catch (deleteError) {
       setError(getErrorMessage(deleteError))
     } finally {
@@ -344,6 +354,10 @@ export default function CompromissosList({
                               <div className="auctus-week-event-actions">
                                 <TarefasChecklist
                                   checked={compromisso.concluido}
+                                  disabled={
+                                    busyId === compromisso.idCompromisso
+                                  }
+                                  label={compromisso.titulo}
                                   onToggle={() =>
                                     void toggleCompleted(compromisso)
                                   }
@@ -427,6 +441,8 @@ export default function CompromissosList({
                     <span className="task-control">
                       <TarefasChecklist
                         checked={compromisso.concluido}
+                        disabled={isBusy}
+                        label={compromisso.titulo}
                         onToggle={() => void toggleCompleted(compromisso)}
                       />
                       <small>

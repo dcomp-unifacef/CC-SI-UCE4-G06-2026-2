@@ -22,13 +22,27 @@ model Cliente {
 }
 
 model Administrador {
-  idAdministrador Int           @id @default(autoincrement()) @map("id_administrador")
-  username        String        @unique @db.VarChar(50)
-  senhaHash       String        @map("senha_hash") @db.VarChar(255)
-  criadoEm        DateTime      @default(now()) @map("criado_em")
-  compromissos    Compromisso[]
+  idAdministrador   Int                @id @default(autoincrement()) @map("id_administrador")
+  username          String             @unique @db.VarChar(50)
+  senhaHash         String             @map("senha_hash") @db.VarChar(255)
+  criadoEm          DateTime           @default(now()) @map("criado_em")
+  compromissos      Compromisso[]
+  pushSubscriptions PushSubscription[]
 
   @@map("administrador")
+}
+
+model PushSubscription {
+  idPushSubscription Int           @id @default(autoincrement()) @map("id_push_subscription")
+  endpoint           String        @unique @db.Text
+  p256dh             String        @db.VarChar(255)
+  auth               String        @db.VarChar(255)
+  criadoEm           DateTime      @default(now()) @map("criado_em")
+  idAdministrador    Int           @map("id_administrador")
+  administrador      Administrador @relation(fields: [idAdministrador], references: [idAdministrador], onDelete: Cascade)
+
+  @@index([idAdministrador])
+  @@map("push_subscription")
 }
 
 model CategoriaCompromisso {

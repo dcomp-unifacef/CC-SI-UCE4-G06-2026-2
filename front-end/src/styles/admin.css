@@ -230,6 +230,52 @@
   gap: 14px;
 }
 
+.auctus-notification-trigger {
+  position: relative;
+  display: grid;
+  flex: 0 0 38px;
+  width: 38px;
+  height: 38px;
+  place-items: center;
+  padding: 0;
+  border: 1px solid var(--auctus-border);
+  border-radius: var(--auctus-radius-sm);
+  background-color: var(--auctus-surface);
+  color: var(--auctus-text-secondary);
+  cursor: pointer;
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.auctus-notification-trigger:hover,
+.auctus-notification-trigger[data-popup-open] {
+  border-color: var(--auctus-accent-border);
+  background-color: var(--auctus-accent-soft);
+  color: var(--auctus-accent);
+}
+
+.auctus-notification-trigger > svg {
+  width: 18px;
+  height: 18px;
+}
+
+.auctus-notification-badge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  display: grid;
+  min-width: 18px;
+  height: 18px;
+  place-items: center;
+  padding: 0 4px;
+  border: 2px solid #ffffff;
+  border-radius: 999px;
+  background-color: var(--auctus-accent);
+  color: #ffffff;
+  font-size: 9px;
+  font-weight: 700;
+  line-height: 1;
+}
+
 .auctus-header-date {
   display: inline-flex;
   align-items: center;
@@ -626,6 +672,53 @@
 }
 
 /* Agenda — Cards de Compromisso */
+.auctus-upcoming-item {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  min-width: 0;
+  padding: 10px 12px;
+  border: 1px solid rgba(228, 232, 226, 0.9);
+  border-radius: var(--auctus-radius-sm);
+  background-color: rgba(255, 255, 255, 0.88);
+}
+
+.auctus-upcoming-accent {
+  flex: 0 0 4px;
+  align-self: stretch;
+  min-height: 34px;
+  border-radius: 4px;
+}
+
+.auctus-upcoming-info {
+  display: grid;
+  flex: 1;
+  min-width: 0;
+  gap: 3px;
+}
+
+.auctus-upcoming-info strong,
+.auctus-upcoming-info span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.auctus-upcoming-info strong {
+  color: var(--auctus-text);
+  font-size: 12px;
+}
+
+.auctus-upcoming-info span {
+  color: var(--auctus-text-muted);
+  font-size: 10.5px;
+}
+
+.auctus-upcoming-item .auctus-btn-link {
+  flex: 0 0 auto;
+  font-size: 11px;
+}
+
 .auctus-agenda-toolbar {
   display: flex;
   align-items: center;
@@ -1259,6 +1352,7 @@
 .auctus-nav-item:focus-visible,
 .auctus-sidebar-logout:focus-visible,
 .auctus-header-logout:focus-visible,
+.auctus-notification-trigger:focus-visible,
 .auctus-breadcrumb-link:focus-visible,
 .auctus-subnav-link:focus-visible,
 .auctus-btn-primary:focus-visible,
@@ -1282,6 +1376,10 @@
 
   .auctus-header {
     padding: 0 20px;
+  }
+
+  .auctus-header-right {
+    gap: 10px;
   }
 
   .auctus-mobile-brand {
@@ -1313,8 +1411,27 @@
     padding: 0 16px;
   }
 
+  .auctus-header-right {
+    gap: 8px;
+  }
+
   .auctus-user-meta {
     display: none;
+  }
+
+  .auctus-notifications-dialog {
+    max-height: calc(100vh - 32px);
+    padding: 18px;
+  }
+
+  .auctus-push-settings {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .auctus-push-settings .auctus-btn-primary,
+  .auctus-push-settings .auctus-btn-secondary {
+    width: 100%;
   }
 
   .auctus-header-logout {
@@ -1511,6 +1628,129 @@
 .auctus-alert-dialog-content.is-sm {
   max-width: 400px;
   padding: 20px;
+}
+
+.auctus-notifications-dialog {
+  display: flex;
+  flex-direction: column;
+  max-width: 560px;
+  max-height: min(80vh, 680px);
+  overflow: hidden;
+}
+
+.auctus-notifications-dialog-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--auctus-border);
+}
+
+.auctus-upcoming-icon {
+  display: grid;
+  flex: 0 0 40px;
+  width: 40px;
+  height: 40px;
+  place-items: center;
+  border-radius: 12px;
+  background-color: #ffe4d7;
+  color: var(--auctus-accent);
+}
+
+.auctus-upcoming-icon svg {
+  width: 20px;
+  height: 20px;
+}
+
+.auctus-notifications-dialog-title {
+  margin: 0;
+  color: var(--auctus-forest);
+  font-family: 'Poppins', 'Inter', sans-serif;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.auctus-notifications-dialog-description {
+  margin-top: 4px;
+  color: var(--auctus-text-muted);
+  font-size: 12px;
+}
+
+.auctus-notifications-close {
+  flex: 0 0 36px;
+  margin-left: auto;
+  font-size: 24px;
+  line-height: 1;
+}
+
+.auctus-push-settings {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 16px;
+  padding: 12px 14px;
+  border: 1px solid var(--auctus-border);
+  border-radius: var(--auctus-radius-sm);
+  background-color: var(--auctus-surface-subtle);
+}
+
+.auctus-push-settings > div {
+  display: grid;
+  gap: 3px;
+}
+
+.auctus-push-settings strong {
+  color: var(--auctus-text);
+  font-size: 12px;
+}
+
+.auctus-push-settings span,
+.auctus-push-hint {
+  color: var(--auctus-text-muted);
+  font-size: 11px;
+}
+
+.auctus-push-settings .auctus-btn-primary,
+.auctus-push-settings .auctus-btn-secondary {
+  min-height: 36px;
+  padding: 0 13px;
+  font-size: 12px;
+}
+
+.auctus-push-hint {
+  margin: 8px 0 0;
+}
+
+.auctus-notifications-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 16px 0 0;
+  padding: 0 4px 4px 0;
+  overflow-y: auto;
+  list-style: none;
+}
+
+.auctus-notifications-list .auctus-upcoming-item {
+  padding: 12px;
+}
+
+.auctus-notifications-list .auctus-upcoming-info {
+  gap: 4px;
+}
+
+.auctus-notifications-list .auctus-upcoming-info span {
+  white-space: normal;
+}
+
+.auctus-notifications-empty {
+  margin-top: 16px;
+  overflow-y: auto;
+}
+
+.auctus-notifications-empty .auctus-empty-icon {
+  margin-bottom: 10px;
 }
 
 .auctus-alert-dialog-header {

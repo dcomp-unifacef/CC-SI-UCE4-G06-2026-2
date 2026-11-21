@@ -1558,6 +1558,11 @@ td small {
   background: #698962;
 }
 
+.task-checkbox:disabled {
+  cursor: wait;
+  opacity: .65;
+}
+
 .appointment-done {
   background: #f9faf8;
 }

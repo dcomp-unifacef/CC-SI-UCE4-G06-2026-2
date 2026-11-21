@@ -16,6 +16,24 @@ export function CalendarIcon({ className }: { className?: string }) {
   )
 }
 
+export function BellIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      aria-hidden="true"
+      className={className}
+      fill="none"
+      stroke="currentColor"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth="1.75"
+      viewBox="0 0 24 24"
+    >
+      <path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9" />
+      <path d="M10 21h4" />
+    </svg>
+  )
+}
+
 export function ChartIcon({ className }: { className?: string }) {
   return (
     <svg

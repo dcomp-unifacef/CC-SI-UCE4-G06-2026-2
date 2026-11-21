@@ -8,6 +8,7 @@ import {
   TagIcon,
   UsersIcon,
 } from './AdminIcons'
+import UpcomingNotifications from './UpcomingNotifications'
 
 type DashboardSection = 'compromissos' | 'clientes' | 'categorias' | 'relatorios'
 
@@ -36,11 +37,13 @@ function SectionIcon({ section }: { section: DashboardSection }) {
 interface AdminLayoutProps {
   administrator: Administrador
   onLogout: () => void
+  refreshToken: number
 }
 
 export default function AdminLayout({
   administrator,
   onLogout,
+  refreshToken,
 }: AdminLayoutProps) {
   return (
     <div className="auctus-shell">
@@ -94,6 +97,7 @@ export default function AdminLayout({
           </div>
 
           <div className="auctus-header-right">
+            <UpcomingNotifications refreshToken={refreshToken} />
             <span className="auctus-header-date" title="Data atual">
               <CalendarIcon />
               <span>{todayLabel}</span>

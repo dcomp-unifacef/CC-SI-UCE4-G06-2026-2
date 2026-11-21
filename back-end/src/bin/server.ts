@@ -8,6 +8,7 @@ import app from '../app'
 import chalk from 'chalk'
 import { createServer } from 'http'
 import { ExpressError } from '../types/error'
+import { startPushNotificationScheduler } from '../services/pushNotificationScheduler'
 
 /**
  * Get port from environment and store in Express.
@@ -29,6 +30,7 @@ const server = createServer(app)
 server.listen(port)
 server.on('error', onError)
 server.on('listening', onListening)
+startPushNotificationScheduler()
 
 /**
  * Normalize a port into a number, string, or false.

@@ -4,6 +4,7 @@ import type {
   NextFunction,
 } from 'express'
 import * as service from '../services/compromissoService'
+import * as pushNotificationService from '../services/pushNotificationService'
 import type {
   CompromissoFilterDto,
   CreateCompromissoDto,
@@ -146,9 +147,8 @@ export async function triggerAlerts(
   next: NextFunction,
 ): Promise<void> {
   try {
-    const summary = await service.dispatchPendingAlerts(
+    const summary = await pushNotificationService.dispatchDueNotifications(
       new Date(),
-      undefined,
       req.session?.idAdministrador,
     )
     res.json(summary)

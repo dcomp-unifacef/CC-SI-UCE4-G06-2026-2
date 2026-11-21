@@ -390,6 +390,7 @@ export default function App() {
             <AdminLayout
               administrator={administrator}
               onLogout={handleLogout}
+              refreshToken={refreshToken}
             />
           ) : (
             <Navigate to="/" replace />
