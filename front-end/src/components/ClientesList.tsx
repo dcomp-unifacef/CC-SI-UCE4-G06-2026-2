@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { deleteCliente, listClientes } from '../data/clientes'
 import { getErrorMessage } from '../services/api'
 import type { Cliente } from '../types/Cliente'
+import { downloadCsv } from '../utils/csv'
 import {
   AlertTriangleIcon,
   DownloadIcon,
@@ -25,12 +26,6 @@ interface ClientesListProps {
   refreshToken: number
   onCreate: () => void
   onEdit: (cliente: Cliente) => void
-}
-
-function csvCell(value: string | number): string {
-  const text = String(value)
-  const safeText = /^[=+\-@\t\r]/.test(text) ? `'${text}` : text
-  return `"${safeText.replaceAll('"', '""')}"`
 }
 
 export default function ClientesList({
@@ -103,18 +98,7 @@ export default function ClientesList({
           new Date(cliente.criadoEm).toLocaleDateString('pt-BR'),
         ]),
       ]
-      const csv = `\uFEFF${rows
-        .map((row) => row.map(csvCell).join(';'))
-        .join('\r\n')}`
-      const file = new Blob([csv], { type: 'text/csv;charset=utf-8' })
-      const url = URL.createObjectURL(file)
-      const link = document.createElement('a')
-      link.href = url
-      link.download = 'clientes.csv'
-      document.body.append(link)
-      link.click()
-      link.remove()
-      window.setTimeout(() => URL.revokeObjectURL(url), 0)
+      downloadCsv('clientes.csv', rows)
     } catch (exportError: unknown) {
       setError(getErrorMessage(exportError))
     }

@@ -16,6 +16,24 @@ export function CalendarIcon({ className }: { className?: string }) {
   )
 }
 
+export function ChartIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      aria-hidden="true"
+      className={className}
+      fill="none"
+      stroke="currentColor"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth="1.75"
+      viewBox="0 0 24 24"
+    >
+      <path d="M3 3v18h18" />
+      <path d="M18 17V9M13 17V5M8 17v-3" />
+    </svg>
+  )
+}
+
 export function UsersIcon({ className }: { className?: string }) {
   return (
     <svg

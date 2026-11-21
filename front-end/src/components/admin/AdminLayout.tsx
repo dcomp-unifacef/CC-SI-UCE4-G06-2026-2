@@ -1,9 +1,15 @@
 import { Link, NavLink, Outlet } from 'react-router-dom'
 import '../../styles/admin.css'
 import type { Administrador } from '../../types/Administrador'
-import { CalendarIcon, LogoutIcon, TagIcon, UsersIcon } from './AdminIcons'
+import {
+  CalendarIcon,
+  ChartIcon,
+  LogoutIcon,
+  TagIcon,
+  UsersIcon,
+} from './AdminIcons'
 
-type DashboardSection = 'compromissos' | 'clientes' | 'categorias'
+type DashboardSection = 'compromissos' | 'clientes' | 'categorias' | 'relatorios'
 
 const todayLabel = new Intl.DateTimeFormat('pt-BR', {
   dateStyle: 'long',
@@ -17,12 +23,14 @@ const sections: Array<{
   { id: 'compromissos', path: '/painel/compromissos', title: 'Agenda' },
   { id: 'clientes', path: '/painel/clientes', title: 'Clientes' },
   { id: 'categorias', path: '/painel/categorias', title: 'Categorias' },
+  { id: 'relatorios', path: '/painel/relatorios', title: 'Relatórios' },
 ]
 
 function SectionIcon({ section }: { section: DashboardSection }) {
   if (section === 'compromissos') return <CalendarIcon />
   if (section === 'clientes') return <UsersIcon />
-  return <TagIcon />
+  if (section === 'categorias') return <TagIcon />
+  return <ChartIcon />
 }
 
 interface AdminLayoutProps {

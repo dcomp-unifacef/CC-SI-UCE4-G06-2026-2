@@ -17,6 +17,7 @@ import CompromissosForm from './components/CompromissosForm'
 import CompromissosList from './components/CompromissosList'
 import Homepage from './components/Homepage'
 import LoginForm from './components/LoginForm'
+import RelatoriosList from './components/RelatoriosList'
 import {
   createCategoria,
   getCategoria,
@@ -469,6 +470,12 @@ export default function App() {
               onSave={handleUpdateCliente}
             />
           }
+        />
+
+        {/* Relatórios */}
+        <Route
+          path="relatorios"
+          element={<RelatoriosList refreshToken={refreshToken} />}
         />
 
         {/* Categorias */}
