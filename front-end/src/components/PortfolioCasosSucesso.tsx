@@ -1,33 +1,33 @@
 const highlights = [
   {
     number: '01',
-    title: 'Tudo começa com organização',
-    description: 'Mantenha clientes, conversas e informações importantes em um só lugar.',
-    icon: '◌',
+    title: 'Auctus Licitações',
+    description: 'Conheça a empresa e sua atuação no universo das licitações.',
+    icon: 'A',
   },
   {
     number: '02',
-    title: 'Uma rotina que flui',
-    description: 'Visualize compromissos e próximos passos sem perder o ritmo do seu dia.',
-    icon: '▦',
+    title: 'Oportunidades para sua empresa',
+    description: 'Converse com a equipe para entender como a Auctus pode apoiar seus objetivos.',
+    icon: '↗',
   },
   {
     number: '03',
-    title: 'Cresça com confiança',
-    description: 'Acompanhe compromissos e pendências e avance com clareza em cada etapa.',
-    icon: '↗',
+    title: 'Atendimento próximo',
+    description: 'Cadastre seu interesse e fale diretamente com a Auctus pelo WhatsApp.',
+    icon: '◌',
   },
 ]
 
 export default function PortfolioCasosSucesso() {
   return (
-    <section className="features-section" id="solucoes">
+    <section className="features-section" id="empresa">
       <div className="section-heading">
         <div>
-          <span className="eyebrow">Seu trabalho, com mais propósito</span>
-          <h2>Uma ideia de cada vez. Um passo adiante.</h2>
+          <span className="eyebrow">Conheça a Auctus</span>
+          <h2>Parcerias que abrem novos caminhos.</h2>
         </div>
-        <p>A Auctus ajuda você a organizar o dia a dia para se concentrar no que realmente importa: fazer seu negócio crescer.</p>
+        <p>A Auctus Licitações está pronta para conversar com empresas interessadas em conhecer sua atuação e explorar novas oportunidades.</p>
       </div>
       <div className="feature-grid">
         {highlights.map((item) => (

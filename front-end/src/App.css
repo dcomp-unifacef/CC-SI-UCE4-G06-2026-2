@@ -56,6 +56,16 @@
   background: #ffad82;
 }
 
+.button-whatsapp {
+  color: #fff;
+  background: #25d366;
+}
+
+.button-whatsapp:hover:not(:disabled) {
+  color: #fff;
+  background: #1faa52;
+}
+
 .button-full {
   width: 100%;
 }

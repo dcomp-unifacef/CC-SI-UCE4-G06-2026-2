@@ -2,6 +2,12 @@ import { useState, type FormEvent } from 'react'
 import { createLead } from '../data/clientes'
 import { getErrorMessage } from '../services/api'
 
+const WHATSAPP_NUMBER = '5516993824959'
+const WHATSAPP_MESSAGE = encodeURIComponent(
+  'Olá! Gostaria de conhecer melhor a Auctus Licitações.',
+)
+const WHATSAPP_URL = `https://wa.me/${WHATSAPP_NUMBER}?text=${WHATSAPP_MESSAGE}`
+
 export default function ContatoLeadForm() {
   const [name, setName] = useState('')
   const [phone, setPhone] = useState('')
@@ -22,7 +28,7 @@ export default function ContatoLeadForm() {
         telefoneWhatsapp: phone.trim(),
         email: email.trim() || null,
       })
-      setMessage('Recebemos seus dados. Em breve entraremos em contato.')
+      setMessage('Cadastro realizado com sucesso. Em breve entraremos em contato.')
       setName('')
       setPhone('')
       setEmail('')
@@ -36,9 +42,9 @@ export default function ContatoLeadForm() {
   return (
     <section className="contact-section" id="contato">
       <div className="contact-copy">
-        <span className="eyebrow eyebrow-light">Vamos construir juntos</span>
-        <h2>Seu próximo passo começa com uma conversa.</h2>
-        <p>Conte um pouco sobre seu negócio. Nossa equipe retorna pelo WhatsApp ou e-mail.</p>
+        <span className="eyebrow eyebrow-light">Auctus Licitações</span>
+        <h2>Vamos conversar sobre novas oportunidades?</h2>
+        <p>Cadastre seu interesse ou fale diretamente com a nossa equipe pelo WhatsApp.</p>
       </div>
       <form className="contact-form" onSubmit={handleSubmit}>
         <label className="form-label">
@@ -81,9 +87,18 @@ export default function ContatoLeadForm() {
         {message && <p className="alert alert-success form-success py-2 px-3 my-2" role="status">{message}</p>}
         {error && <p className="alert alert-danger form-error py-2 px-3 my-2" role="alert">{error}</p>}
         <button className="btn button button-lime button-full w-100 mt-2" disabled={isSubmitting} type="submit">
-          {isSubmitting ? 'Enviando…' : 'Quero conversar'}
+          {isSubmitting ? 'Cadastrando…' : 'Cadastrar interesse'}
           <svg aria-hidden="true"><use href="/icons.svg#arrow-up-right" /></svg>
         </button>
+        <a
+          className="btn button button-whatsapp button-full w-100"
+          href={WHATSAPP_URL}
+          rel="noreferrer"
+          target="_blank"
+        >
+          Quero conversar pelo WhatsApp
+          <svg aria-hidden="true"><use href="/icons.svg#arrow-up-right" /></svg>
+        </a>
         <small>Seus dados são usados apenas para responder ao seu contato.</small>
       </form>
     </section>
