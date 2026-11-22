@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from 'react'
 import { createLead } from '../data/clientes'
 import { getErrorMessage } from '../services/api'
+import { normalizeBrazilianPhone } from '../utils/brazilianPhone'
 
 const WHATSAPP_NUMBER = '5516993824959'
 const WHATSAPP_MESSAGE = encodeURIComponent(
@@ -20,12 +21,19 @@ export default function ContatoLeadForm() {
     event.preventDefault()
     setMessage('')
     setError('')
+
+    const normalizedPhone = normalizeBrazilianPhone(phone)
+    if (!normalizedPhone) {
+      setError('Informe um WhatsApp brasileiro válido com DDD.')
+      return
+    }
+
     setIsSubmitting(true)
 
     try {
       await createLead({
         razaoSocialNome: name.trim(),
-        telefoneWhatsapp: phone.trim(),
+        telefoneWhatsapp: normalizedPhone,
         email: email.trim() || null,
       })
       setMessage('Cadastro realizado com sucesso. Em breve entraremos em contato.')
@@ -69,6 +77,7 @@ export default function ContatoLeadForm() {
               onChange={(event) => setPhone(event.target.value)}
               placeholder="(11) 99999-9999"
               required
+              type="tel"
               value={phone}
             />
           </label>

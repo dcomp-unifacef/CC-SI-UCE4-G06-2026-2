@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from 'react'
 import { getErrorMessage } from '../services/api'
 import type { Cliente, ClienteInput } from '../types/Cliente'
+import { normalizeBrazilianPhone } from '../utils/brazilianPhone'
 import { ArrowLeftIcon } from './admin/AdminIcons'
 import { Select } from './ui/select'
 
@@ -36,13 +37,20 @@ export default function ClientesForm({
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     setError('')
+
+    const normalizedPhone = normalizeBrazilianPhone(phone)
+    if (!normalizedPhone) {
+      setError('Informe um WhatsApp brasileiro válido com DDD.')
+      return
+    }
+
     setIsSubmitting(true)
 
     try {
       await onSave({
         razaoSocialNome: name.trim(),
         cnpjCpf: document.trim() || null,
-        telefoneWhatsapp: phone.trim(),
+        telefoneWhatsapp: normalizedPhone,
         email: email.trim() || null,
         ramoAtuacao: business.trim() || null,
         origemContato: origin,
@@ -110,6 +118,7 @@ export default function ClientesForm({
               onChange={(event) => setPhone(event.target.value)}
               placeholder="(16) 99999-9999"
               required
+              type="tel"
               value={phone}
             />
           </div>
