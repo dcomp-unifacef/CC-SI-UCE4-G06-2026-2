@@ -17,9 +17,12 @@ Run backend commands from `back-end/`:
 npm run dev       # Start the TypeScript server with watch mode
 npm run build     # Compile TypeScript into dist/
 npm start         # Build, then start the compiled server
+npm test          # Run the Vitest unit tests once
+npm run test:watch                         # Run Vitest in watch mode
+npx vitest run tests/sessionStore.test.ts  # Run a single test file
 ```
 
-The backend requires `DATABASE_URL`; the server uses `PORT` if set and otherwise listens on `8888`. There are currently no test files, test scripts, lint scripts, or configured test/lint runners, so no full-suite or single-test command is available.
+The backend requires `DATABASE_URL`; the server uses `PORT` if set and otherwise listens on `8888`. Unit tests live in `back-end/tests/` and use Vitest; they mock the repository modules with `vi.mock`, so they need no database. The `tests/` folder is excluded from the TypeScript build. There is no backend lint script.
 
 Run front-end commands from `front-end/`:
 
