@@ -1,5 +1,6 @@
 const configuredApiUrl = import.meta.env.VITE_API_URL?.trim()
-export const API_BASE_URL = (configuredApiUrl || '/api').replace(/\/$/, '')
+const defaultApiUrl = import.meta.env.DEV ? '/api' : ''
+export const API_BASE_URL = (configuredApiUrl || defaultApiUrl).replace(/\/$/, '')
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null

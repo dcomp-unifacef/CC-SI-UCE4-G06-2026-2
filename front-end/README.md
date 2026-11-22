@@ -21,13 +21,13 @@ Aplicação React + TypeScript para o site institucional e o painel administrati
    npm run dev
    ```
 
-O Vite encaminha requisições de `/api` para `VITE_BACKEND_URL` (por padrão `http://localhost:8888`) e remove o prefixo antes de enviá-las à API. Configure `VITE_API_URL` para a URL-base pública da API quando houver um proxy/reverse proxy adequado no ambiente publicado.
+Durante o desenvolvimento, o Vite encaminha requisições de `/api` para `VITE_BACKEND_URL` (por padrão `http://localhost:8888`) e remove o prefixo antes de enviá-las à API. Em produção, o backend serve os arquivos compilados do front e a API na mesma origem; deixe `VITE_API_URL` sem definir para usar caminhos relativos. Se o front e a API forem publicados separadamente, configure `VITE_API_URL` com a URL-base pública da API e ajuste CORS e cookies para essa arquitetura.
 
 ## Notificações push
 
 Para receber lembretes com o painel fechado, configure `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY` e `VAPID_SUBJECT` em `back-end/.env`. Gere um par uma única vez com `npx web-push generate-vapid-keys` no diretório `back-end`; mantenha a chave privada apenas nas variáveis de ambiente do servidor. A origem do painel publicado deve usar HTTPS (localhost é aceito pelos navegadores para desenvolvimento).
 
-Depois de configurar o banco e as chaves, aplique a migração adicionada:
+Depois de configurar o banco e as chaves, aplique as migrações pendentes:
 
 ```bash
 cd back-end
@@ -43,4 +43,4 @@ O backend verifica os lembretes a cada minuto; portanto, precisa permanecer em e
 - `npm run preview`: serve localmente a versão construída.
 - `npm run lint`: executa Oxlint.
 
-O painel usa `POST /administradores/autenticar` para validar as credenciais. O backend atual não emite token/cookie nem protege as demais rotas; a tela de login só controla a navegação no navegador e não deve ser considerada uma barreira de autorização.
+O painel usa `POST /administradores/autenticar` para iniciar uma sessão por cookie HttpOnly. As rotas administrativas exigem uma sessão válida; ao servir front e API na mesma origem, o navegador pode enviar esse cookie sem depender de cookies de terceiros.
