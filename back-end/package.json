@@ -8,6 +8,7 @@
     "build": "rimraf dist && npx tsc",
     "postbuild": "copyfiles -u 1 src/views/*.null dist",
     "prestart": "npm run build",
+    "seed:demo": "prisma db seed",
     "test": "vitest run",
     "test:watch": "vitest"
   },

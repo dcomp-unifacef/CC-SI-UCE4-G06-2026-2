@@ -92,14 +92,36 @@ export function DateTimePicker({
   const containerRef = React.useRef<HTMLDivElement>(null)
 
   const parsed = React.useMemo(() => parseDateTime(value), [value])
+  const [today, setToday] = React.useState(() => new Date())
+
+  React.useEffect(() => {
+    let timeoutId: number
+
+    function scheduleNextDay() {
+      const now = new Date()
+      const nextDay = new Date(
+        now.getFullYear(),
+        now.getMonth(),
+        now.getDate() + 1,
+      )
+
+      timeoutId = window.setTimeout(() => {
+        setToday(new Date())
+        scheduleNextDay()
+      }, nextDay.getTime() - now.getTime())
+    }
+
+    scheduleNextDay()
+    return () => window.clearTimeout(timeoutId)
+  }, [])
 
   const [navOffset, setNavOffset] = React.useState<{
     year: number
     month: number
   } | null>(null)
 
-  const viewYear = navOffset?.year ?? parsed?.year ?? 2026
-  const viewMonth = navOffset?.month ?? parsed?.month ?? 10 // nov
+  const viewYear = navOffset?.year ?? parsed?.year ?? today.getFullYear()
+  const viewMonth = navOffset?.month ?? parsed?.month ?? today.getMonth()
 
   // Fecha ao clicar fora
   React.useEffect(() => {
@@ -156,7 +178,7 @@ export function DateTimePicker({
   function handleSelectTime(time: string) {
     const year = parsed ? parsed.year : viewYear
     const month = parsed ? parsed.month : viewMonth
-    const day = parsed ? parsed.day : 19
+    const day = parsed ? parsed.day : today.getDate()
     const yStr = String(year)
     const mStr = String(month + 1).padStart(2, '0')
     const dStr = String(day).padStart(2, '0')
@@ -277,7 +299,9 @@ export function DateTimePicker({
                     parsed.month === cell.month &&
                     parsed.day === cell.day
                   const isToday =
-                    cell.year === 2026 && cell.month === 10 && cell.day === 19
+                    cell.year === today.getFullYear() &&
+                    cell.month === today.getMonth() &&
+                    cell.day === today.getDate()
 
                   return (
                     <button
@@ -303,7 +327,11 @@ export function DateTimePicker({
                 <button
                   className="auctus-dtp-quick-btn"
                   onClick={() => {
-                    handleSelectDay(2026, 10, 19)
+                    handleSelectDay(
+                      today.getFullYear(),
+                      today.getMonth(),
+                      today.getDate(),
+                    )
                   }}
                   type="button"
                 >
