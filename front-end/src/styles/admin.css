@@ -344,7 +344,7 @@
 }
 
 .auctus-header-logout {
-  display: inline-flex;
+  display: none;
   align-items: center;
   gap: 6px;
   min-height: 36px;
@@ -1380,6 +1380,10 @@
 
   .auctus-header-right {
     gap: 10px;
+  }
+
+  .auctus-header-logout {
+    display: inline-flex;
   }
 
   .auctus-mobile-brand {
